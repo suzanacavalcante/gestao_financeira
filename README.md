@@ -47,6 +47,7 @@ POSTGRES_USER=[TENHA SEU PRÓPRIO USUÁRIO]
 POSTGRES_PASSWORD=[TENHA SUA PRÓPRIA SENHA]
 SECRET_KEY=[TENHA SUA PRÓPRIA SENHA]
 DEBUG=1
+```
 
 ### 3. Configuração do 
 ```bash
@@ -58,7 +59,7 @@ docker-compose exec web python manage.py migrate
 
 # Criar um usuário administrador
 docker-compose exec web python manage.py createsuperuser
-
+```
 O sistema estará disponível em: http://localhost:8000 (ou o IP do seu servidor).
 
 ## 🔒 Segurança
