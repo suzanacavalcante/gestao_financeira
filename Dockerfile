@@ -1,29 +1,42 @@
-# 1. Imagem base
-FROM python:3.11-slim
+FROM python:3.11.3-alpine3.18
+LABEL mantainer="https://suzanacavalcante.com.br"
 
-# 2. Impede que o Python gere arquivos .pyc e permite ver logs em tempo real
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONBUFFERED 1
+ENV PYTHONUNBUFFERED 1
 
-# 3. Define a pasta onde o código vai morar dentro do container
-WORKDIR /app
+COPY ./djangoapp /djangoapp
+COPY ./scripts /scripts
 
-# 4. Instala dependências do sistema necessárias para o Banco de Dados PostgreSQL
-# O Rocky Linux é RHEL, mas dentro do container será utilizar o Debian (slim), pois é o padrão de mercado para imagens Python
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# Entra na pasta djangoapp no container
+WORKDIR /djangoapp
 
-# 5. Copia o arquivo de requisitos primeiro para aproveitar o cache do Docker
-COPY requirements.txt .
-
-# 6. Instala as bibliotecas do projeto 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# 7. Copia todo o conteúdo do projeto 
-COPY . .
-
-# 8. Porta onde o app vai rodar
+# A porta 8000 estará disponível para conexões externas ao container
 EXPOSE 8000
+
+# RUN executa comandos em um shell dentro do container para construir a imagem. 
+# O resultado da execução do comando é armazenado no sistema de arquivos da 
+# imagem como uma nova camada.
+# Agrupar os comandos em um único RUN pode reduzir a quantidade de camadas da 
+# imagem e torná-la mais eficiente.
+RUN python -m venv /venv && \
+  /venv/bin/pip install --upgrade pip && \
+  /venv/bin/pip install -r /djangoapp/requirements.txt && \
+  adduser --disabled-password --no-create-home duser && \
+  mkdir -p /data/web/static && \
+  mkdir -p /data/web/media && \
+  chown -R duser:duser /venv && \
+  chown -R duser:duser /data/web/static && \
+  chown -R duser:duser /data/web/media && \
+  chmod -R 755 /data/web/static && \
+  chmod -R 755 /data/web/media && \
+  chmod -R +x /scripts
+
+# Adiciona a pasta scripts e venv/bin 
+# no $PATH do container.
+ENV PATH="/scripts:/venv/bin:$PATH"
+
+# Muda o usuário para duser
+USER duser
+
+# Executa o arquivo scripts/commands.sh
+CMD ["commands.sh"]
