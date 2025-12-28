@@ -78,8 +78,12 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', 'CHANGE-ME'),
+        'NAME': os.getenv('POSTGRES_DB', 'CHANGE-ME'),
+        'USER': os.getenv('POSTGRES_USER', 'CHANGE-ME'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'CHANGE-ME'),
+        'HOST': os.getenv('POSTGRES_HOST', 'CHANGE-ME'),
+        'PORT': os.getenv('POSTGRES_PORT', 'CHANGE-ME')
     }
 }
 
@@ -106,9 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
