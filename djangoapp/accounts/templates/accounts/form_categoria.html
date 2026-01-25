@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - PoupAí{% endblock %}
+
+{% block content%}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card-custom" style="width: 100%; max-width: 500px;">
+        <h2 class="mb-4 text-center">
+            <span style="color: 8a2be2;"><i class="bi bi-pencil-square"></i></span>
+            {{ titulo }}
+        </h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="text-gray small mb-2">Nome da Categoria</label>
+                {{ form.nome }}
+                {% if form.nome.errors %}
+                    <div class="text-danger small mt-1">{{ form.nome.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label class="text-gray small mb-2">Tipo de Fluxo</label>
+                {{ form.tipo }}
+                {% if form.tipo.errors %}
+                    <div class="text-danger small mt-1">{{ form.tipo.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-purple" style="background-color: #8a2be2; border: none; color: white; padding: 12px; font-weight: 600;">
+                    Salvar Alterações
+                </button>
+                <a href="{% url 'categorias' %}" class="btn btn-outline-secondary" style="padding: 12px;">
+                    Cancelar e Voltar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Garantindo que os campos do Django sigam o tema dark */
+    input, select {
+        width: 100%; 
+        padding: 12px; 
+        background: #131325 !important; 
+        border: 1px solid #30304d !important; 
+        color: white !important; 
+        border-radius: 8px !important;
+        transition: 0.3s;
+    }
+
+    input:focus, select:focus {
+        border-color: #8a2be2 !important;
+        box-shadow: 0 0 0 0.25rem rgba(138, 43, 226, 0.25) !important;
+        outline: none;
+    }
+
+    .text-gray { 
+        color: #b0b0b0; 
+    }
+</style>
+{% endblock %}

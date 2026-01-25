@@ -32,6 +32,7 @@
                         <tr>
                             <th>Nome</th>
                             <th>Tipo</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -42,6 +43,15 @@
                                 <span class="badge {% if cat.tipo == 'receita' %}bg-success{% else %}bg-danger{% endif %}">
                                     {{ cat.get_tipo_display }}
                                 </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'editar_categoria' cat.pk %}" class="btn btn-sm btn-outline-info me-2">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <a href="{% url 'excluir_categoria' cat.pk %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
                             </td>
                         </tr>
                         {% empty %}

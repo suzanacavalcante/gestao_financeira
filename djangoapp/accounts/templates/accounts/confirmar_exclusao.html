@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card-custom text-center" style="max-width: 500px; margin: 50px auto;">
+    <h3 class="text-danger mb-4">Excluir Categoria?</h3>
+    <p>Tem certeza que deseja excluir <strong>{{ obj.nome }}</strong>?</p>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
+        <a href="{% url 'categorias' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
