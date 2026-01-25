@@ -45,6 +45,7 @@
                             <th>Descrição</th>
                             <th>Categoria</th>
                             <th>Valor</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,6 +57,14 @@
                             <td class="{% if lanc.categoria.tipo == 'receita' %}text-success{% else %}text-danger{% endif %}">
                                 {% if lanc.categoria.tipo == 'receita' %}+{% else %}-{% endif %}
                                 R$ {{ lanc.valor }}
+                            </td>
+                            <td>
+                            <a href="{% url 'editar_lancamento' lanc.pk %}" class="btn btn-sm btn-outline-info me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'excluir_lancamento' lanc.pk %}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
                             </td>
                             
                         </tr>

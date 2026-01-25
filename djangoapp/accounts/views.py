@@ -75,3 +75,32 @@ def lancamentos(request):
     lista_lancamentos = Lancamento.objects.filter(user=request.user).order_by('-data')
 
     return render(request, 'accounts/lancamentos.html', {'form': form, 'lancamentos': lista_lancamentos})
+
+@login_required
+def editar_lancamento(request, pk):
+    # 1. Buscamos o registro no banco
+    lancamento = get_object_or_404(Lancamento, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        # 2. IMPORTANTE: Nomeie 'data' e 'instance'. 
+        # Isso evita que o Django confunda o objeto lancamento com os dados do POST.
+        form = LancamentoForm(data=request.POST, instance=lancamento, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('lancamentos')
+    else:
+        # 3. No GET, também nomeamos explicitamente
+        form = LancamentoForm(instance=lancamento, user=request.user)
+        
+    return render(request, 'accounts/form_lancamento.html', {
+        'form': form, 
+        'titulo': 'Editar Lançamento'
+    })
+
+@login_required
+def excluir_lancamento(request, pk):
+    lancamento = get_object_or_404(Lancamento, pk=pk, user=request.user)
+    if request.method == 'POST':
+        lancamento.delete()
+        return redirect('lancamentos')
+    return render(request, 'accounts/confirmar_exclusao.html', {'obj': lancamento})

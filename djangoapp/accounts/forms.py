@@ -11,12 +11,14 @@ class LancamentoForm(forms.ModelForm):
         model = Lancamento
         fields = ['descricao', 'valor', 'data', 'categoria']
         widgets = {
-            'data': forms.DateInput(attrs={'type': 'date'})
+            'data': forms.DateInput(attrs={'type': 'date'}),
         }
-    
+
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None) # Pega o usuário pela view
-        super(LancamentoForm, self).__init__(*args, *kwargs)
+        # Captura o 'user' e remove do kwargs ANTES de passar para o super()
+        user = kwargs.pop('user', None) 
+        super(LancamentoForm, self).__init__(*args, **kwargs)
+        
+        # Agora aplicamos o filtro se o usuário existir
         if user:
-            # Filtra as categorias para mostrar apenas as do usuário logado
             self.fields['categoria'].queryset = Categoria.objects.filter(user=user)
