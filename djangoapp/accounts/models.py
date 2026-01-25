@@ -13,3 +13,13 @@ class Categoria(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.tipo})"
+    
+class Lancamento(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT) # Impede a exclusão de uma categoria esteja em uso
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    data = models.DateField()
+    descricao = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"{self.descricao} - R$ {self.valor}"

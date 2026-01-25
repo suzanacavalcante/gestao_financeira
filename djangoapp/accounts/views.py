@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Categoria
-from .forms import CategoriaForm
+from .models import Categoria, Lancamento
+from .forms import CategoriaForm, LancamentoForm
 
 def cadastro(request):
     if request.method =='POST':
@@ -58,3 +58,20 @@ def excluir_categoria(request, pk):
         categoria.delete()
         return redirect('categorias')
     return render(request, 'accounts/confirmar_exclusao.html', {'obj': categoria})
+
+@login_required
+def lancamentos(request):
+    if request.method == 'POST':
+        form = LancamentoForm(request.POST, user=request.user)
+        if form.is_valid():
+            lancamento = form.save(commit=False)
+            lancamento.user = request.user
+            lancamento.save()
+            return redirect('lancamentos')
+        
+    else:
+        form = LancamentoForm(user=request.user)
+    
+    lista_lancamentos = Lancamento.objects.filter(user=request.user).order_by('-data')
+
+    return render(request, 'accounts/lancamentos.html', {'form': form, 'lancamentos': lista_lancamentos})
