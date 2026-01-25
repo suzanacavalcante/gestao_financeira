@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PoupAí{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="text-white mb-0">Resumo Financeiro</h2>
+            <p class="text-white small">Acompanhe seu patrimônio e suas economias em tempo real.</p>
+        </div>
+
+        <div class="text-end">
+            <span class="badge p-2 px-3" style="background: rgba(138, 43, 226, 0.2); color: #a5a5ff; border: 1px solid #8a2be2;">
+                <i class="bi bi-person-fill me-1"></i>
+                {{ request.user.username }}
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card-custom border-start border-info border-4 shadow-lg h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-info bg-opacity-10 p-2 rounded me-3">
+                        <i class="bi bi-graph-up-arrow text-info me-2"></i>
+                    </div>
+                    <small class="text-gray fw-bold text-uppercase tracking-wider">Dinheiro que Entrou</small>
+                </div>
+                <h3 class="text-info fw-bold">
+                    R$ {{ entradas|floatformat:2 }}
+                </h3>
+                <p class="text-white small mt-2 mb-0">Soma de todos os ganhos registrados</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card-custom border-start border-danger border-4 shadow-lg h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-danger bg-opacity-10 p-2 rounded me-3">
+                        <i class="bi bi-graph-down-arrow text-danger fs-4"></i>
+                    </div>
+                    <small class="text-gray fw-bold text-uppercase tracking-wider">Saídas</small>
+                </div>
+                <h3 class="text-danger fw-bold">R$ {{ saidas|floatformat:2 }}</h3>
+                <p class="text-white small mt-2 mb-0">Despesas e gastos totais</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card-custom border-start border-4 shadow-lg h-100" style="border-color: #8a2be2 !important;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-opacity-10 p-2 rounded me-3" style="background-color: rgba(138, 43, 226, 0.1);">
+                        <i class="bi bi-trophy fd-4" style="color: #8a2be2;"></i>
+                    </div>
+                    <small class="text-gray fw-bold text-uppercase tracking-wider">Total Poupado</small>
+                </div>
+                <h3 class="text-white fw-bold">R$ {{ total_metas|floatformat:2 }}</h3>
+                <p class="text-white small mt-2 mb-0">Dinheiro reservado para seus objetivos.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card-custom border-start border-primary border-4 shadow-lg h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-primary bg-opacity-10 p-2 rounded me-3">
+                        <i class="bi bi-wallet2 text-primary fs-4"></i>
+                    </div>
+                    <small class="text-gray fw-bold text-uppercase tracking-wider">Saldo em Conta</small>
+                </div>
+
+                <h3 class="{% if saldo_disponivel < 0 %}text-danger{% else %}text-white{% endif %} fw-bold">
+                    R$ {{ saldo_disponivel|floatformat:2 }}
+                </h3>
+                <p class="text-white small mt-2 mb-0">Total disponível somando todas as categorias.</p>
+            </div>
+        </div>
+
+        
+
+        <div class="col-md4 mb-4">
+            <div class="card-custom border-start border-success border-4 shadow-lg h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-success bg-opacity-10 p-2 rounded me-3">
+                        <i class="bi bi-piggy-bank text-success fs-4"></i>
+                    </div>
+                    <small class="text-gray fw-bold text-uppercase tracking-wider">Saldo Livre</small>
+                </div>
+                <h3 class="text-success fw-bold">R$ {{ saldo_livre|floatformat:2 }}</h3>
+                <p class="text-white small mt-2 mb-0">Disponível para uso sem comprometer metas.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card-custom p-4 d-flex justify-content-around align-items-center flex-wrap gap-3">
+                <span class="text-gray me-3 d-none d-md-inline">Ações rápidas:</span>
+                <a href="{% url 'lancamentos' %}" class="btn btn-outline-primary btn-sm px-4">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Novo Lançamento
+                </a>
+                <a href="{% url 'metas' %}" class="btn btn-outline-purple btn-sm px-4">
+                    <i class="bi bi-flag me-1"></i>
+                    Criar Meta
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* Estilos para o Dashboard */
+    .card-custom {
+        background: #1e1e2f;
+        padding: 25px;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .card-custom:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .text-gray { color: #b0b0b0; }
+    
+    .tracking-wider { letter-spacing: 0.05em; }
+
+    .btn-outline-purple {
+        color: #8a2be2;
+        border-color: #8a2be2;
+    }
+    .btn-outline-purple:hover {
+        background-color: #8a2be2;
+        color: white;
+    }
+
+    /* Ajuste para ícones Bootstrap */
+    .bi { vertical-align: middle; }
+</style>
+{% endblock %}

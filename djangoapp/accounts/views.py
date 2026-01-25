@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from .models import Categoria, Lancamento, MetaFinanceira
 from .forms import CategoriaForm, LancamentoForm, MetaForm
 
@@ -61,19 +62,28 @@ def excluir_categoria(request, pk):
 
 @login_required
 def lancamentos(request):
+    lista_lancamentos = Lancamento.objects.filter(user=request.user).order_by('-data')
     if request.method == 'POST':
-        form = LancamentoForm(request.POST, user=request.user)
+        form = LancamentoForm(request.POST) #, user=request.user
         if form.is_valid():
             lancamento = form.save(commit=False)
             lancamento.user = request.user
+
+            categoria_obj = form.cleaned_data.get('categoria')
+            valor_abs = abs(form.cleaned_data.get('valor'))
+
+            if categoria_obj.tipo == 'despesa':
+                lancamento.valor = -valor_abs
+            else:
+                lancamento.valor = valor_abs
+
             lancamento.save()
             return redirect('lancamentos')
         
     else:
-        form = LancamentoForm(user=request.user)
+        #form = LancamentoForm(user=request.user)
+        form = LancamentoForm()
     
-    lista_lancamentos = Lancamento.objects.filter(user=request.user).order_by('-data')
-
     return render(request, 'accounts/lancamentos.html', {'form': form, 'lancamentos': lista_lancamentos})
 
 @login_required
@@ -141,3 +151,32 @@ def excluir_meta(request, pk):
         meta.delete()
         return redirect('metas')
     return render(request, 'accounts/confirmar_exclusao.html', {'obj': meta})
+
+@login_required
+def dashboard(request):
+    entradas = Lancamento.objects.filter(
+        user=request.user,
+        categoria__tipo='receita'
+    ).aggregate(Sum('valor'))['valor__sum'] or 0
+
+    saidas_real = Lancamento.objects.filter(
+        user=request.user,
+        categoria__tipo='despesa'
+    ).aggregate(Sum('valor'))['valor__sum'] or 0
+
+    saidas_absoluto = abs(saidas_real)
+
+    saldo_real = entradas + saidas_real
+
+    total_metas = MetaFinanceira.objects.filter(user=request.user).aggregate(Sum('valor_poupado'))['valor_poupado__sum'] or 0
+    saldo_disponivel = saldo_real - total_metas
+
+    context = {
+        'entradas': entradas,
+        'saidas': saidas_absoluto,
+        'saldo_disponivel': saldo_disponivel,
+        'total_metas': total_metas,
+        'saldo_livre': saldo_disponivel,
+    }
+
+    return render(request, 'accounts/dashboard.html', context)

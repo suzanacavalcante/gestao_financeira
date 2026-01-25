@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class Categoria(models.Model):
     TIPO_CHOICES = [
         ('receita', 'Receita (Entrada)'),
-        ('despesas', 'Despesa (Saída)'),
+        ('despesa', 'Despesa (Saída)'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)

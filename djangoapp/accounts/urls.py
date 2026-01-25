@@ -13,4 +13,5 @@ urlpatterns = [
     path('metas/', views.metas, name='metas'),
     path('metas/editar/<int:pk>', views.editar_meta, name='editar_meta'),
     path('metas/excluir/<int:pk>', views.excluir_meta, name='excluir_meta'),
+    path('dashboard/', views.dashboard, name='dashboard')
 ]
