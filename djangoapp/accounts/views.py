@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 def cadastro(request):
     if request.method =='POST':
@@ -14,3 +15,7 @@ def cadastro(request):
         form = UserCreationForm()
     
     return render(request, 'accounts/cadastro.html', {'form': form})
+
+@login_required # Garante acesso somente a quem estiver logado
+def profile(request):
+    return render(request, 'accounts/profile.html')

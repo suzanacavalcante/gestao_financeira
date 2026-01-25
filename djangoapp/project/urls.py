@@ -34,6 +34,3 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root = settings.MEDIA_ROOT
     )
-
-LOGIN_REDIRECT_URL = '/' # Redireciona para a página inicial após o login
-LOGOUT_REDIRECT_URL = '/login/' # Redireciona para o login ao sair
