@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Categoria, Lancamento
-from .forms import CategoriaForm, LancamentoForm
+from .models import Categoria, Lancamento, MetaFinanceira
+from .forms import CategoriaForm, LancamentoForm, MetaForm
 
 def cadastro(request):
     if request.method =='POST':
@@ -104,3 +104,18 @@ def excluir_lancamento(request, pk):
         lancamento.delete()
         return redirect('lancamentos')
     return render(request, 'accounts/confirmar_exclusao.html', {'obj': lancamento})
+
+@login_required
+def metas(request):
+    if request.method == 'POST':
+        form = MetaForm(request.POST)
+        if form.is_valid():
+            meta = form.save(commit=False)
+            meta.user = request.user
+            meta.save()
+            return redirect('metas')
+    else:
+        form = MetaForm()
+    
+    lista_metas = MetaFinanceira.objects.filter(user=request.user)
+    return render(request, 'accounts/metas.html', {'form': form, 'metas': lista_metas})

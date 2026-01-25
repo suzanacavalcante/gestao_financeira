@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestão de Metas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Minhas Metas</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card-custom">
+                <h5 class="text-purple mb-3" style="color: #8a2be2;">Definir Objetivo</h5>
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="text-gray small">O que você quer conquistar?</label>
+                        {{ form.nome }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-gray small">Valor Alvo (R$)</label>
+                        {{ form.valor_alvo }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-gray small">Quanto já tem poupado? (R$)</label>
+                        {{ form.valor_poupado }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-gray small">Data Limite (Opcional)</label>
+                        {{ form.data_limite }}
+                    </div>
+
+                    <button class="btn btn-purple w-100" style="background-color: #8a2be2; color: white; border: none; padding: 10px;">Criar Meta</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="row">
+                {% for meta in metas %}
+
+                <div class="col-md-6 mv-3">
+                    <div class="card-custom border-0 shadow-sm" style="background: #1e1e2f;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-white mb-0">{{ meta.nome }}</h6>
+                            <span class="badge" style="background: #8a2be2;">{{ meta.porcentagem }}</span>
+                        </div>
+
+                        <div class="progress mb-2" style="height: 10px; background-color: #131325;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ meta.porcentagem }}%; background-color: #8a2be2;"
+                                aria-valuenow="{{ meta.porcentagem }}" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between small text-gray">
+                            <span>R$ {{ meta.valor_poupado }}</span>
+                            <span>Alvo: R$ {{ meta.valor_alvo }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Nenhuma meta definidia. Que tal começar a poupar hoje?</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input {
+        width: 100%; 
+        padding: 8px; 
+        background: #131325; 
+        border: 1px solid #30304d; 
+        color: white; 
+        border-radius: 6px;
+    }
+    .text-gray { color: #b0b0b0; }
+</style>
+{% endblock %}

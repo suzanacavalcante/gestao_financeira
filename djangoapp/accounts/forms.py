@@ -1,5 +1,6 @@
 from django import forms
 from .models import Categoria, Lancamento
+from .models import MetaFinanceira
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
@@ -15,10 +16,16 @@ class LancamentoForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        # Captura o 'user' e remove do kwargs ANTES de passar para o super()
         user = kwargs.pop('user', None) 
         super(LancamentoForm, self).__init__(*args, **kwargs)
         
-        # Agora aplicamos o filtro se o usuário existir
         if user:
             self.fields['categoria'].queryset = Categoria.objects.filter(user=user)
+
+class MetaForm(forms.ModelForm):
+    class Meta:
+        model = MetaFinanceira
+        fields = ['nome', 'valor_alvo', 'valor_poupado', 'data_limite']
+        widgets = {
+            'data_limite': forms.DateInput(attrs={'type': 'date'})
+        }

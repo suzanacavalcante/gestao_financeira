@@ -10,4 +10,5 @@ urlpatterns = [
     path('lancamentos/', views.lancamentos, name='lancamentos'),
     path('lancamentos/editar/<int:pk>', views.editar_lancamento, name='editar_lancamento'),
     path('lancamentos/excluir/<int:pk>', views.excluir_lancamento, name='excluir_lancamento'),
+    path('metas/', views.metas, name='metas'),
 ]
