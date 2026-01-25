@@ -33,7 +33,7 @@
                         {{ form.data_limite }}
                     </div>
 
-                    <button class="btn btn-purple w-100" style="background-color: #8a2be2; color: white; border: none; padding: 10px;">Criar Meta</button>
+                    <button type="submit" class="btn btn-purple w-100" style="background-color: #8a2be2; color: white; border: none; padding: 10px;">Criar Meta</button>
                 </form>
             </div>
         </div>
@@ -42,11 +42,20 @@
             <div class="row">
                 {% for meta in metas %}
 
-                <div class="col-md-6 mv-3">
+                <div class="col-md-6 mb-3">
                     <div class="card-custom border-0 shadow-sm" style="background: #1e1e2f;">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="text-white mb-0">{{ meta.nome }}</h6>
-                            <span class="badge" style="background: #8a2be2;">{{ meta.porcentagem }}</span>
+                            <div>
+                                <a href="{% url 'editar_meta' meta.pk %}" class="text-info me-2 text-decoration-none" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <a href="{% url 'excluir_meta' meta.pk %}" class="text-danger text-decoration-none" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                <span class="badge" style="background: #8a2be2;">{{ meta.porcentagem }}%</span>
+                            </div>
                         </div>
 
                         <div class="progress mb-2" style="height: 10px; background-color: #131325;">
@@ -56,9 +65,18 @@
                         </div>
 
                         <div class="d-flex justify-content-between small text-gray">
-                            <span>R$ {{ meta.valor_poupado }}</span>
+                            <span>Poupado: R$ {{ meta.valor_poupado }}</span>
                             <span>Alvo: R$ {{ meta.valor_alvo }}</span>
                         </div>
+
+                        {% if meta.data_limite %}
+                        <div class="text-center mt-2" style="border-color: #30304d !important;">
+                            <small style="color: #a5a5ff; font-weight: 500;">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                Prazo: {{ meta.data_limite|date:"d/m/Y" }}
+                            </small>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% empty %}

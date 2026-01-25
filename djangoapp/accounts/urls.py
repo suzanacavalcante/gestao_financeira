@@ -11,4 +11,6 @@ urlpatterns = [
     path('lancamentos/editar/<int:pk>', views.editar_lancamento, name='editar_lancamento'),
     path('lancamentos/excluir/<int:pk>', views.excluir_lancamento, name='excluir_lancamento'),
     path('metas/', views.metas, name='metas'),
+    path('metas/editar/<int:pk>', views.editar_meta, name='editar_meta'),
+    path('metas/excluir/<int:pk>', views.excluir_meta, name='excluir_meta'),
 ]

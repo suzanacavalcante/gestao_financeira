@@ -119,3 +119,25 @@ def metas(request):
     
     lista_metas = MetaFinanceira.objects.filter(user=request.user)
     return render(request, 'accounts/metas.html', {'form': form, 'metas': lista_metas})
+
+@login_required
+def editar_meta(request, pk):
+    meta = get_object_or_404(MetaFinanceira, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = MetaForm(request.POST, instance=meta)
+        if form.is_valid():
+            form.save()
+            return redirect('metas')
+    
+    else:
+        form = MetaForm(instance=meta)
+    
+    return render(request, 'accounts/form_meta.html', {'form': form, 'titulo': 'Editar Meta'})
+
+@login_required
+def excluir_meta(request, pk):
+    meta = get_object_or_404(MetaFinanceira, pk=pk, user=request.user)
+    if request.method == 'POST':
+        meta.delete()
+        return redirect('metas')
+    return render(request, 'accounts/confirmar_exclusao.html', {'obj': meta})
