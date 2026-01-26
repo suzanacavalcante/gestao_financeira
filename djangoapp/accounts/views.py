@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Sum, Q
+from django.db.models.functions import TruncMonth
 from .models import Categoria, Lancamento, MetaFinanceira
 from .forms import CategoriaForm, LancamentoForm, MetaForm
 
@@ -171,12 +172,29 @@ def dashboard(request):
     total_metas = MetaFinanceira.objects.filter(user=request.user).aggregate(Sum('valor_poupado'))['valor_poupado__sum'] or 0
     saldo_disponivel = saldo_real - total_metas
 
+    dados_grafico = Lancamento.objects.filter(user=request.user, data__year=2026) \
+        .annotate(mes=TruncMonth('data')) \
+        .values('mes') \
+        .annotate(
+            total_entrada=Sum('valor', filter=Q(categoria__tipo='receita')),
+            total_saida=Sum('valor', filter=Q(categoria__tipo='despesa'))
+        ).order_by('mes')
+    
+    label_meses = [d['mes'].strftime('%b') for d in dados_grafico]
+    valores_entradas = [float(d['total_entrada'] or 0) for d in dados_grafico]
+    valores_saidas = [abs(float(d['total_saida'] or 0)) for d in dados_grafico]
+
     context = {
         'entradas': entradas,
         'saidas': saidas_absoluto,
         'saldo_disponivel': saldo_disponivel,
         'total_metas': total_metas,
         'saldo_livre': saldo_disponivel,
+        
+        # Grafico de Barras
+        'labels_meses': label_meses,
+        'valores_entradas': valores_entradas,
+        'valores_saidas': valores_saidas,
     }
 
     return render(request, 'accounts/dashboard.html', context)
