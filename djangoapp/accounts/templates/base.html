@@ -99,7 +99,14 @@
                 <a href="{% url 'profile' %}" class="nav-link active"><i class="bi bi-person-circle"></i> Perfil</a>
             </nav>
 
-            <a href="{% url 'logout' %}" class="btn-logout"><i class="bi bi-box-arrow-left"></i>Sair</a>
+            <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: none;">
+                {% csrf_token %}
+            </form>
+
+            <a href="javascript:void(0)" onclick="document.getElementById('logout-form').submit()" class="btn-logout">
+                <i class="bi bi-box-arrow-left"></i>
+                Sair
+            </a>
         </div>
 
         <div class="main-content">
