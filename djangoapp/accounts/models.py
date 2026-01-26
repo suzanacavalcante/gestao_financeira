@@ -21,6 +21,21 @@ class Lancamento(models.Model):
     data = models.DateField()
     descricao = models.CharField(max_length=200)
 
+    FORMA_PAGAMENTO_CHOICES = [
+        ('debito', 'Débito'),
+        ('credito', 'Crédito'),
+        ('pix', 'Pix'),
+        ('dinheiro', 'Dinheiro'),
+        ('outros', 'Outros'),
+    ]
+
+    forma_pagamento = models.CharField(
+        max_length=10,
+        choices=FORMA_PAGAMENTO_CHOICES,
+        blank=True,
+        null=True
+    )
+
     def __str__(self):
         return f"{self.descricao} - R$ {self.valor}"
     

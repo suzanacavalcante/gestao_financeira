@@ -29,26 +29,79 @@
                 </div>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3">
                 <label class="text-gray small mb-2">Categoria</label>
                 {{ form.categoria }}
             </div>
 
+            <div class="mb-4" id="container-pagamento" style="display: none;">
+                <label class="small mb-2" style="color: #0dcaf0;">
+                    <i class="bi bi-credit-card-2-back me-1"></i> Forma de Pagamento
+                </label>
+                {{ form.forma_pagamento }}
+            </div>
+
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-purple" style="background-color: #8a2be2; border: none; color: white; padding: 12px; font-weight: 600;">
-                    Atualizar Lançamento
+                    Salvar Alterações
                 </button>
-                <a href="{% url 'lancamentos' %}" class="btn btn-outline-secondary" style="padding: 12px;">
+                <a href="{% url 'lancamentos' %}" class="btn btn-outline-secondary" style="padding: 12px; border-radius: 8px;">
                     Cancelar
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoriaSelect = document.querySelector('select[name="categoria"]');
+        const containerPagamento = document.getElementById('container-pagamento');
+
+        function verificarPagamento() {
+            // Se houver uma categoria selecionada, mostramos a forma de pagamento
+            // A lógica de limpar se for Receita já está na sua View para segurança
+            if (categoriaSelect.value) {
+                containerPagamento.style.display = 'block';
+            } else {
+                containerPagamento.style.display = 'none';
+            }
+        }
+
+        categoriaSelect.addEventListener('change', verificarPagamento);
+        verificarPagamento(); // Executa ao carregar para casos de edição
+    });
+</script>
+
 <style>
-    input, select {
-        width: 100%; padding: 12px; background: #131325 !important; border: 1px solid #30304d !important;
-        color: white !important; border-radius: 8px !important;
+    /* Mantendo sua paleta original */
+    .card-custom {
+        background: #1e1e2f;
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .text-gray { color: #b0b0b0; }
+
+    input, select, textarea {
+        width: 100%; 
+        padding: 12px; 
+        background: #131325 !important; 
+        border: 1px solid #30304d !important;
+        color: white !important; 
+        border-radius: 8px !important;
+        outline: none;
+    }
+
+    input:focus, select:focus {
+        border-color: #8a2be2 !important;
+        box-shadow: 0 0 0 0.2rem rgba(138, 43, 226, 0.25);
+    }
+
+    .btn-purple:hover {
+        background-color: #7a1fd1 !important;
+        filter: brightness(1.1);
     }
 </style>
 {% endblock %}

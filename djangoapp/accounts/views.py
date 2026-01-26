@@ -3,9 +3,12 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Q
-from django.db.models.functions import TruncMonth
+from django.utils import timezone
+from django.db.models.functions import TruncMonth, ExtractDay
 from .models import Categoria, Lancamento, MetaFinanceira
 from .forms import CategoriaForm, LancamentoForm, MetaForm
+from datetime import date
+import calendar
 
 def cadastro(request):
     if request.method =='POST':
@@ -65,7 +68,7 @@ def excluir_categoria(request, pk):
 def lancamentos(request):
     lista_lancamentos = Lancamento.objects.filter(user=request.user).order_by('-data')
     if request.method == 'POST':
-        form = LancamentoForm(request.POST) #, user=request.user
+        form = LancamentoForm(request.POST, user=request.user)
         if form.is_valid():
             lancamento = form.save(commit=False)
             lancamento.user = request.user
@@ -77,30 +80,38 @@ def lancamentos(request):
                 lancamento.valor = -valor_abs
             else:
                 lancamento.valor = valor_abs
+                lancamento.forma_pagamento = None
 
             lancamento.save()
             return redirect('lancamentos')
         
     else:
-        #form = LancamentoForm(user=request.user)
-        form = LancamentoForm()
+        form = LancamentoForm(user=request.user)
     
-    return render(request, 'accounts/lancamentos.html', {'form': form, 'lancamentos': lista_lancamentos})
+    return render(request, 'accounts/lancamentos.html', {'form': form, 'lancamentos': lista_lancamentos}) #
 
 @login_required
 def editar_lancamento(request, pk):
-    # 1. Buscamos o registro no banco
     lancamento = get_object_or_404(Lancamento, pk=pk, user=request.user)
     
     if request.method == 'POST':
-        # 2. IMPORTANTE: Nomeie 'data' e 'instance'. 
-        # Isso evita que o Django confunda o objeto lancamento com os dados do POST.
         form = LancamentoForm(data=request.POST, instance=lancamento, user=request.user)
         if form.is_valid():
-            form.save()
+            novo_lancamento = form.save(commit=False)
+            
+            categoria_obj = form.cleaned_data.get('categoria')
+            valor_abs = abs(form.cleaned_data.get('valor'))
+
+            if categoria_obj.tipo == 'despesa':
+                novo_lancamento.valor = -valor_abs
+            else:
+                novo_lancamento.valor = valor_abs
+                novo_lancamento.forma_pagamento = None 
+                
+            novo_lancamento.save()
             return redirect('lancamentos')
     else:
-        # 3. No GET, também nomeamos explicitamente
+        lancamento.valor = abs(lancamento.valor)
         form = LancamentoForm(instance=lancamento, user=request.user)
         
     return render(request, 'accounts/form_lancamento.html', {
@@ -155,46 +166,103 @@ def excluir_meta(request, pk):
 
 @login_required
 def dashboard(request):
-    entradas = Lancamento.objects.filter(
-        user=request.user,
-        categoria__tipo='receita'
-    ).aggregate(Sum('valor'))['valor__sum'] or 0
-
-    saidas_real = Lancamento.objects.filter(
-        user=request.user,
-        categoria__tipo='despesa'
-    ).aggregate(Sum('valor'))['valor__sum'] or 0
-
-    saidas_absoluto = abs(saidas_real)
-
-    saldo_real = entradas + saidas_real
-
-    total_metas = MetaFinanceira.objects.filter(user=request.user).aggregate(Sum('valor_poupado'))['valor_poupado__sum'] or 0
-    saldo_disponivel = saldo_real - total_metas
-
-    dados_grafico = Lancamento.objects.filter(user=request.user, data__year=2026) \
-        .annotate(mes=TruncMonth('data')) \
-        .values('mes') \
-        .annotate(
-            total_entrada=Sum('valor', filter=Q(categoria__tipo='receita')),
-            total_saida=Sum('valor', filter=Q(categoria__tipo='despesa'))
-        ).order_by('mes')
+    hoje = timezone.now()
+    ano_atual = hoje.year
     
-    label_meses = [d['mes'].strftime('%b') for d in dados_grafico]
-    valores_entradas = [float(d['total_entrada'] or 0) for d in dados_grafico]
-    valores_saidas = [abs(float(d['total_saida'] or 0)) for d in dados_grafico]
+    # 1. Captura do mês (Limpa e robusta)
+    mes_param = request.GET.get('mes')
+    try:
+        mes_selecionado = int(mes_param)
+    except (TypeError, ValueError):
+        mes_selecionado = hoje.month
+
+    # 2. Filtro dos cards (Sempre filtrado pelo mês selecionado)
+    lancamentos_mes = Lancamento.objects.filter(
+        user=request.user,
+        data__month=mes_selecionado,
+        data__year=ano_atual
+    )
+
+    entradas_valor = lancamentos_mes.filter(categoria__tipo='receita').aggregate(Sum('valor'))['valor__sum'] or 0
+    saidas_valor = lancamentos_mes.filter(categoria__tipo='despesa').aggregate(Sum('valor'))['valor__sum'] or 0
+    
+    total_metas = MetaFinanceira.objects.filter(user=request.user).aggregate(Sum('valor_poupado'))['valor_poupado__sum'] or 0
+    saldo_disponivel = (entradas_valor + saidas_valor) - total_metas
+
+    # 3. Lógica do Gráfico (Decide se mostra Dias ou Meses)
+    if 'mes' in request.GET:
+        # Visão MENSAL (Dia a dia)
+        ultimo_dia = calendar.monthrange(ano_atual, mes_selecionado)[1]
+        labels_grafico = [f"{d}" for d in range(1, ultimo_dia + 1)]
+        
+        # Otimização: Uma única consulta para o mês todo, depois organizamos no Python
+        dados_dias = lancamentos_mes.annotate(dia=ExtractDay('data'))\
+            .values('dia')\
+            .annotate(
+                total_e=Sum('valor', filter=Q(categoria__tipo='receita')),
+                total_s=Sum('valor', filter=Q(categoria__tipo='despesa'))
+            )
+        
+        # Criamos dicionários para mapear dia -> valor
+        mapa_e = {d['dia']: float(d['total_e'] or 0) for d in dados_dias}
+        mapa_s = {d['dia']: abs(float(d['total_s'] or 0)) for d in dados_dias}
+        
+        entradas_dados = [mapa_e.get(dia, 0) for dia in range(1, ultimo_dia + 1)]
+        saidas_dados = [mapa_s.get(dia, 0) for dia in range(1, ultimo_dia + 1)]
+    else:
+        # Visão ANUAL - Busca dados de todos os meses do ano atual
+        dados_anual = Lancamento.objects.filter(user=request.user, data__year=ano_atual) \
+            .annotate(mes_idx=TruncMonth('data')) \
+            .values('mes_idx') \
+            .annotate(
+                total_e=Sum('valor', filter=Q(categoria__tipo='receita')),
+                total_s=Sum('valor', filter=Q(categoria__tipo='despesa'))
+            ).order_by('mes_idx')
+            
+        labels_grafico = [d['mes_idx'].strftime('%b') for d in dados_anual]
+        entradas_dados = [float(d['total_e'] or 0) for d in dados_anual]
+        saidas_dados = [abs(float(d['total_s'] or 0)) for d in dados_anual]
+        
+        # Se o banco estiver vazio, garante labels básicos para o gráfico não sumir
+        if not labels_grafico:
+            labels_grafico = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+            entradas_dados = [0] * 12
+            saidas_dados = [0] * 12
+
+    # 4. Nomes para exibição
+    nomes_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    nome_mes_exibicao = nomes_meses[mes_selecionado - 1]
+
+    dados_pagamento = lancamentos_mes.filter(
+        categoria__tipo='despesa',
+        forma_pagamento__isnull=False
+    ).values('forma_pagamento').annotate(total=Sum('valor'))
+
+    labels_pagamento = [d['forma_pagamento'].capitalize() for d in dados_pagamento]
+    valores_pagamento = [abs(float(d['total'])) for d in dados_pagamento]
 
     context = {
-        'entradas': entradas,
-        'saidas': saidas_absoluto,
+        'entradas': entradas_valor,
+        'saidas': abs(saidas_valor),
         'saldo_disponivel': saldo_disponivel,
         'total_metas': total_metas,
         'saldo_livre': saldo_disponivel,
         
-        # Grafico de Barras
-        'labels_meses': label_meses,
-        'valores_entradas': valores_entradas,
-        'valores_saidas': valores_saidas,
+        # Gráfico de Barras
+        'labels_grafico': labels_grafico,
+        'valores_entradas': entradas_dados,
+        'valores_saidas': saidas_dados,
+
+        # Filtro do Gráfico de Barras
+        'filtrado': 'mes' in request.GET,
+        'mes_atual': mes_selecionado,
+        'nome_mes': nome_mes_exibicao,
+        'ano_atual': ano_atual,
+
+        # Grafico de Donut
+        'labels_pagamento': labels_pagamento,
+        'valores_pagamento': valores_pagamento,
     }
 
     return render(request, 'accounts/dashboard.html', context)
