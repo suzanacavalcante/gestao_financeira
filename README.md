@@ -17,20 +17,27 @@ Este é um projeto de gestão financeira desenvolvido em **Python (Django)**, ut
 
 ## Tecnologias Utilizadas
 
-- **Backend**: Django 5.x
-- **Banco de Dados**: PostgreSQL 16
-- **Containerização**: Docker & Docker Compose
-- **Frontend**: Bootstrap 5 & Bootstrap Icons
-- **Servidor de Estáticos**: WhiteNoise
+### Backend & Web
+* **Python 3.11** com **Django 5.2**: Framework principal para lógica de negócio e segurança.
+* **Django-auth**: Sistema de autenticação personalizado.
+* **WhiteNoise**: Serviço eficiente de arquivos estáticos.
+
+### Infraestrutura & DevOps
+* **Docker & Docker Compose**: Containerização de toda a aplicação e banco de dados.
+* **Nginx**: Utilizado como Proxy Reverso para gerenciamento de tráfego.
+* **Rocky Linux 9.5 (VPS)**: Servidor de hospedagem de nível empresarial.
+* **SSL/TLS (HTTPS)**: Implementado via Let's Encrypt para comunicação segura.
+
+### Banco de Dados
+* **PostgreSQL**: Banco de dados relacional robusto para garantir a integridade dos dados financeiros.
 
 ## Funcionalidades
-
-- [x] **Design Responsivo:** Adaptado para dispositivos móveis, tablets e desktop.
-- [x] **Tela de Login/Cadastroo:** O sistema permite cadastro, login e logout. As senhas são criptografadas.
-- [x] **Lançamentos Financeiros:** O usuário pode registrar entradas (receitas) e saídas (despesas) com valor, data e descrição.
-- [x] **Categoria** O usuário pode criar e editar categorias para classificar seus gastos.
-- [x] **Gestão de Metas** Uma seção para definir objetivos financeiros com valor alvo e valor já poupado.
-- [x] **Dashboard** Visualização gráfica de gastos por categoria, evolução mensal e status das metas.
+- [x] Autenticação de usuários (Login/Logout/Cadastro).
+- [x] Dashboard dinâmico com resumo financeiro.
+- [x] Gestão de Lançamentos (Entradas e Saídas).
+- [x] Categorização personalizada.
+- [x] Controle de Metas de economia.
+- [x] Interface responsiva.
 
 ## Estrutura do Projeto
 
@@ -39,14 +46,20 @@ Este é um projeto de gestão financeira desenvolvido em **Python (Django)**, ut
 * `.env`: Arquivo de variáveis de ambiente (não versionado por segurança).
 * `docker-compose.yml`: Configuração dos serviços.
 
-## Como rodar o projeto
+## Como rodar o projeto localmente
 
 ### 1. Pré-requisitos
 Certifique-se de ter instalado em sua máquina ou VPS:
 * Docker
 * Docker Compose
 
-### 2. Configuração do Ambiente
+### 2. Clone o repositório:
+```bash
+git clone [https://github.com/suzanacavalcante/gestao_financeira.git](https://github.com/suzanacavalcante/gestao_financeira.git)
+cd gestao_financeira
+```
+
+### 3. Configuração do Ambiente
 Crie um arquivo `.env` na raiz do projeto baseado nas variáveis necessárias:
 ```env
 POSTGRES_DB=financas_db
@@ -65,9 +78,9 @@ docker-compose up -d --build
 docker-compose exec [nome_projeto] python manage.py migrate
 
 # Criar um usuário administrador
-docker-compose exec [nome_projeto] python manage.py createsuperuser
+docker-compose exec djangoapp python manage.py createsuperuser
 ```
-O sistema estará disponível em: http://localhost:8000 (ou o IP do seu servidor).
+O sistema estará disponível em: http://localhost:8000.
 
 ## Estrutura de Volumes
 O projeto utiliza volumes persistentes para garantir que seus dados não sejam perdidos ao reiniciar os containers:
