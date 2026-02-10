@@ -1,12 +1,17 @@
 # 💰 Sistema de Gestão Financeira
 
-> **Status do Projeto:**  🚧 Em desenvolvimento
+> **Status do Projeto:**  🚧 Em desenvolvimento | **Fase Atual do Projeto:** Ajuste da tela de Cadastro e Login, Observabilidade e Testes de Segurança.
 
 ## Sobre o Projeto
 
 Este é um projeto de gestão financeira desenvolvido em **Python (Django)**, utilizando **PostgreSQL** como banco de dados e **Docker** para orquestração de ambiente. O projeto inclui dashboards para visualização de gastos e metas.
 
-## Últimas Novidades
+## Últimas Novidades - 10/02
+- **Login e Cadastro**: Novos campos estão sendo adicionados à tela de cadastro.
+- **Observabilidade**: Estou adicionando uma ferramenta para monitorar a aplicação. 
+- **Testes de Segurança**: Chamei um amigo, Pedro Trugillo para fazer alguns testes de segurança tanto na aplicação quanto em meu servidor.
+
+## Novidades Anteriores
 > O PROJETO JÁ POSSUI UMA V1
 - **Arquitetura Dockerizada**: Aplicação e Banco de Dados (PostgreSQL) rodando em containers independentes.
 - **Deploy em VPS**: Configurado para rodar em ambientes de produção.
